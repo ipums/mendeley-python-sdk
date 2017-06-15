@@ -27,7 +27,7 @@ class Documents(DocumentsBase):
         """
         return super(Documents, self).get(id, view)
 
-    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None):
+    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, marker=None):
         """
         Retrieves documents, as a paginated collection.
 
@@ -40,7 +40,7 @@ class Documents(DocumentsBase):
         :return: a :class:`Page <mendeley.pagination.Page>` of
                  :class:`UserDocuments <mendeley.models.documents.UserDocument>`.
         """
-        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since)
+        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since, marker)
 
     def iter(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None):
         """
