@@ -20,7 +20,7 @@ class Annotations(GetByIdResource, ListResource):
         """
         return super(Annotations, self).get(id)
 
-    def list(self, page_size=None, modified_since=None, deleted_since=None):
+    def list(self, page_size=None, modified_since=None, deleted_since=None, document_id=None, group_id=None):
         """
         Retrieves annotations as a paginated collection.
 
@@ -30,7 +30,8 @@ class Annotations(GetByIdResource, ListResource):
         :return: a :class:`Page <mendeley.pagination.Page>` of
         :class:`Annotations <mendeley.models.annotations.Annotation>`.
         """
-        return super(Annotations, self).list(page_size, modified_since=modified_since, deleted_since=deleted_since)
+        return super(Annotations, self).list(page_size, modified_since=modified_since, deleted_since=deleted_since, 
+                                             document_id=document_id, group_id=group_id)
 
     def iter(self, page_size=None, modified_since=None, deleted_since=None):
         """
