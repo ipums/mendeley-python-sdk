@@ -17,7 +17,7 @@ class BaseDocument(SessionResponseObject):
 
     @classmethod
     def fields(cls):
-        return ['id', 'title', 'type', 'source', 'year', 'identifiers', 'keywords', 'abstract']
+        return ['id', 'title', 'type', 'source', 'year', 'identifiers', 'keywords', 'abstract', 'notes']
 
 
 class BaseClientView(SessionResponseObject):

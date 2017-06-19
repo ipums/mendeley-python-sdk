@@ -135,6 +135,7 @@ class UserDocument(UserBaseDocument):
     .. attribute:: identifiers
     .. attribute:: keywords
     .. attribute:: abstract
+    .. attribute:: notes
     """
 
     def update(self, **kwargs):
