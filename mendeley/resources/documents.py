@@ -27,7 +27,7 @@ class Documents(DocumentsBase):
         """
         return super(Documents, self).get(id, view)
 
-    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, marker=None):
+    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, marker=None, folder_id=None, tag=None):
         """
         Retrieves documents, as a paginated collection.
 
@@ -40,9 +40,9 @@ class Documents(DocumentsBase):
         :return: a :class:`Page <mendeley.pagination.Page>` of
                  :class:`UserDocuments <mendeley.models.documents.UserDocument>`.
         """
-        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since, marker)
+        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since, marker, folder_id, tag)
 
-    def iter(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None):
+    def iter(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, folder_id=None, tag=None):
         """
         Retrieves documents, as an iterator.
 
@@ -54,7 +54,7 @@ class Documents(DocumentsBase):
         :param deleted_since: if specified, only returns the IDs of documents deleted after this timestamp.
         :return: an iterator of :class:`UserDocuments <mendeley.models.documents.UserDocument>`.
         """
-        return super(Documents, self).iter(page_size, view, sort, order, modified_since, deleted_since)
+        return super(Documents, self).iter(page_size, view, sort, order, modified_since, deleted_since, folder_id, tag)
 
     def create(self, title, type, **kwargs):
         """
@@ -122,6 +122,7 @@ class Documents(DocumentsBase):
         :param author: Author.
         :param source: Source.
         :param abstract: Abstract.
+        :param tag: Tag.
         :param min_year: Minimum year for documents to return.
         :param max_year: Maximum year for documents to return.
         :param view: the view to get.  One of 'bib', 'client', 'tags', 'all'.
