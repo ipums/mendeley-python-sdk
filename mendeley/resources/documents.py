@@ -114,7 +114,7 @@ class Documents(DocumentsBase):
         return DocumentsSearch(self.session, query=query, view=view, marker=marker)
 
     def advanced_search(self, title=None, author=None, source=None, abstract=None, tag=None, type=None, min_year=None, max_year=None,
-                        view=None, marker=None):
+                        view=None, page=None):
         """
         Executes an advanced search in the logged-in user's library, where individual fields can be searched on.
 
@@ -133,7 +133,7 @@ class Documents(DocumentsBase):
             raise MendeleyException('Search is not available for group documents')
 
         return DocumentsSearch(self.session, title=title, author=author, source=source, abstract=abstract,
-                               tag=tag, type=None, min_year=min_year, max_year=max_year, view=view, marker=marker)
+                               tag=tag, type=None, min_year=min_year, max_year=max_year, view=view, page=page)
 
     @staticmethod
     def view_type(view):
@@ -155,7 +155,7 @@ class DocumentsSearch(ListResource):
         self.session = session
         self.params = kwargs
 
-    def list(self, page_size=None, marker=None):
+    def list(self, page_size=None, page=None):
         """
         Retrieves search results, as a paginated collection.
 
@@ -163,7 +163,7 @@ class DocumentsSearch(ListResource):
         :return: a :class:`Page <mendeley.pagination.Page>` of
                  :class:`CatalogDocuments <mendeley.models.catalog.CatalogDocument>`.
         """
-        return super(DocumentsSearch, self).list(page_size, marker=marker)
+        return super(DocumentsSearch, self).list(page_size, page=page)
 
     def iter(self, page_size=None):
         """
