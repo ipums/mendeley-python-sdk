@@ -27,7 +27,7 @@ class Documents(DocumentsBase):
         """
         return super(Documents, self).get(id, view)
 
-    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, marker=None, folder_id=None, tag=None):
+    def list(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, marker=None, folder_id=None, tag=None, page=None):
         """
         Retrieves documents, as a paginated collection.
 
@@ -40,7 +40,7 @@ class Documents(DocumentsBase):
         :return: a :class:`Page <mendeley.pagination.Page>` of
                  :class:`UserDocuments <mendeley.models.documents.UserDocument>`.
         """
-        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since, marker, folder_id, tag)
+        return super(Documents, self).list(page_size, view, sort, order, modified_since, deleted_since, marker, folder_id, tag, page)
 
     def iter(self, page_size=None, view=None, sort=None, order=None, modified_since=None, deleted_since=None, folder_id=None, tag=None):
         """
@@ -155,7 +155,7 @@ class DocumentsSearch(ListResource):
         self.session = session
         self.params = kwargs
 
-    def list(self, page_size=None, page=None):
+    def list(self, page_size=None, **kwargs):
         """
         Retrieves search results, as a paginated collection.
 
@@ -163,7 +163,7 @@ class DocumentsSearch(ListResource):
         :return: a :class:`Page <mendeley.pagination.Page>` of
                  :class:`CatalogDocuments <mendeley.models.catalog.CatalogDocument>`.
         """
-        return super(DocumentsSearch, self).list(page_size, page=page)
+        return super(DocumentsSearch, self).list(page_size, **kwargs)
 
     def iter(self, page_size=None):
         """
