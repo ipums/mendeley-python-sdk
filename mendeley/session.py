@@ -1,4 +1,13 @@
 import platform
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+# create formatter and add it to the handlers
+formatter = logging.Formatter(
+    '%(name)s:%(levelname)s - %(message)s')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
 
 from future.moves.urllib.parse import urljoin
 from oauthlib.oauth2 import TokenExpiredError
@@ -125,11 +134,11 @@ class AutoRefreshMendeleySession(MendeleySession):
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
-            print ("Requesting " + url)
+            logger.debug("Requesting " + url)
             # just try the MendeleySession request first
             return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
         except (MendeleyApiException, TokenExpiredError) as e:
-            print ("Receiving " + type(e).__name__)
+            logger.debug("Receiving " + type(e).__name__)
             # Check to see if we have an expired access token. This comes in two
             # forms: either a MendeleyApiException or OAuthlib's TokenExpiredError
             # Mendeley's API uses MendeleyAPIException for everything so you have
@@ -143,11 +152,11 @@ class AutoRefreshMendeleySession(MendeleySession):
             # you try to make a first request with an already expired token (such
             # as the one that's probably in the config file.)
             if ((type(e).__name__ is 'MendeleyApiException') and (e.status == 401) and ('Token has expired' in e.message)) or (type(e).__name__ is 'TokenExpiredError'):
-                print ("Handling a token expiration of type " + type(e).__name__)
+                logger.debug("Handling a token expiration of type " + type(e).__name__)
                 self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
-                print ("Re-requesting " + url)
+                logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
             else:
-                print ("Re-raising " + type(e).__name__)
+                logger.debug("Re-raising " + type(e).__name__)
                 # pass on other mendeley exceptions
                 raise
