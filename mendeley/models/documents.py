@@ -76,6 +76,7 @@ class UserBibView(BaseBibView):
     .. attribute:: city
     .. attribute:: edition
     .. attribute:: institution
+    .. attribute:: department
     .. attribute:: series
     .. attribute:: chapter
     .. attribute:: revision

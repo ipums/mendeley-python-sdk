@@ -39,5 +39,5 @@ class BaseBibView(SessionResponseObject):
 
     @classmethod
     def fields(cls):
-        return ['pages', 'volume', 'issue', 'websites', 'month', 'publisher', 'day', 'city', 'edition', 'institution',
+        return ['pages', 'volume', 'issue', 'websites', 'month', 'publisher', 'day', 'city', 'edition', 'institution', 'department', 
                 'series', 'chapter', 'revision']
