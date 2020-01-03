@@ -15,7 +15,7 @@ from future.moves.urllib.parse import urljoin
 from oauthlib.oauth2 import TokenExpiredError
 from requests_oauthlib import OAuth2Session
 
-from mendeley.exception import MendeleyApiException
+from mendeley.exception import MendeleyApiException, MendeleyRefreshTokenChangedException
 from mendeley.resources import *
 from mendeley.version import __version__
 
@@ -123,13 +123,12 @@ class MendeleySession(OAuth2Session):
                                             platform.python_implementation(),
                                             platform.python_version(),
                                             platform.system(),
-                                            platform.release())
+                                            platform.release())  
 
 # extending the MendeleySession class to do auto-token-refresh on
 # token expiration. Mendeley access tokens expire after 1 hour.
 class AutoRefreshMendeleySession(MendeleySession):
     def __init__(self, mendeley, token, refresh_token):
-        print("I'm in init")
         super(AutoRefreshMendeleySession, self).__init__(mendeley, token)
         # silly name to avoid namespace collision with oauth refresh_token() method
         self.the_refresh_token = refresh_token
@@ -160,11 +159,13 @@ class AutoRefreshMendeleySession(MendeleySession):
                 new_token = self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
                 logger.debug("Received new token")
                 if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
+                    # Sometimes you'll get back a different refresh token than the one you used.
                     logger.debug("The refresh token has changed.")
+                    # we will raise a MendeleyRefreshTokenChangedException. It's up to the client to respond to this.
+                    raise(MendeleyRefreshTokenChangedException)
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
             elif ((type(e).__name__ is 'MendeleyApiException') and (e.status == 400)):
-                pdb.set_trace()
                 logger.debug("Attempt to use refresh token failed.")
             else:
                 logger.debug("Re-raising " + type(e).__name__)
