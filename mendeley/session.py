@@ -133,6 +133,7 @@ class AutoRefreshMendeleySession(MendeleySession):
         # silly name to avoid namespace collision with oauth refresh_token() method
         self.the_refresh_token = refresh_token
         self.client_secret = mendeley.client_secret
+        self.update_refresh_token_callback = update_refresh_token_callback
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
@@ -161,7 +162,7 @@ class AutoRefreshMendeleySession(MendeleySession):
                 if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
                     # Sometimes you'll get back a different refresh token than the one you used.
                     logger.debug("The refresh token has changed.")
-                    update_refresh_token_callback(new_token['refresh_token'])
+                    self.update_refresh_token_callback(new_token['refresh_token'])
                     # we will call some callback here
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
