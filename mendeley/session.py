@@ -135,12 +135,12 @@ class AutoRefreshMendeleySession(MendeleySession):
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
-            print("I'm in request")
             logger.debug("Requesting " + url)
             # just try the MendeleySession request first
             return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
         except (MendeleyApiException, TokenExpiredError) as e:
             logger.debug("Receiving " + type(e).__name__)
+            logger.debug("The message is " + e.message)
             # Check to see if we have an expired access token. This comes in two
             # forms: either a MendeleyApiException or OAuthlib's TokenExpiredError
             # Mendeley's API uses MendeleyAPIException for everything so you have
