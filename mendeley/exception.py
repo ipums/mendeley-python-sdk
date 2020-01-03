@@ -20,5 +20,3 @@ class MendeleyApiException(MendeleyException):
         except ValueError:
             return self.rsp.text
 
-class MendeleyRefreshTokenChangedException(Exception):
-    pass

@@ -15,7 +15,7 @@ from future.moves.urllib.parse import urljoin
 from oauthlib.oauth2 import TokenExpiredError
 from requests_oauthlib import OAuth2Session
 
-from mendeley.exception import MendeleyApiException, MendeleyRefreshTokenChangedException
+from mendeley.exception import MendeleyApiException
 from mendeley.resources import *
 from mendeley.version import __version__
 
@@ -161,8 +161,7 @@ class AutoRefreshMendeleySession(MendeleySession):
                 if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
                     # Sometimes you'll get back a different refresh token than the one you used.
                     logger.debug("The refresh token has changed.")
-                    # we will raise a MendeleyRefreshTokenChangedException. It's up to the client to respond to this.
-                    raise(MendeleyRefreshTokenChangedException)
+                    # we will call some callback here
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
             elif ((type(e).__name__ is 'MendeleyApiException') and (e.status == 400)):
