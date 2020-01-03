@@ -135,7 +135,7 @@ class AutoRefreshMendeleySession(MendeleySession):
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
-            print("I'm still in request")
+            print("I'm in request")
             logger.debug("Requesting " + url)
             # just try the MendeleySession request first
             return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
@@ -155,9 +155,12 @@ class AutoRefreshMendeleySession(MendeleySession):
             # as the one that's probably in the config file.)
             if ((type(e).__name__ is 'MendeleyApiException') and (e.status == 401) and ('Token has expired' in e.message)) or (type(e).__name__ is 'TokenExpiredError'):
                 logger.debug("Handling a token expiration of type " + type(e).__name__)
-                self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
-                logger.debug("Re-requesting " + url)
-                return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
+                try:
+                    self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
+                    logger.debug("Re-requesting " + url)
+                    return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
+                except(MendeleyApiException, TokenExpiredError) as e:
+                    logger.debug("Now receiving " + type(e).__name__)
             else:
                 logger.debug("Re-raising " + type(e).__name__)
                 # pass on other mendeley exceptions
