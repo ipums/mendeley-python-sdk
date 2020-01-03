@@ -159,6 +159,8 @@ class AutoRefreshMendeleySession(MendeleySession):
                 logger.debug("Handling a token expiration of type " + type(e).__name__)
                 new_token = self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
                 logger.debug("Received new token")
+                if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
+                    logger.debug("The refresh token has changed.")
                 pdb.set_trace()
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
