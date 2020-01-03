@@ -161,12 +161,11 @@ class AutoRefreshMendeleySession(MendeleySession):
                 logger.debug("Received new token")
                 if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
                     logger.debug("The refresh token has changed.")
-                pdb.set_trace()
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
             elif ((type(e).__name__ is 'MendeleyApiException') and (e.status == 400)):
+                pdb.set_trace()
                 logger.debug("Attempt to use refresh token failed.")
-                logger.debug(repr(e))
             else:
                 logger.debug("Re-raising " + type(e).__name__)
                 # pass on other mendeley exceptions
