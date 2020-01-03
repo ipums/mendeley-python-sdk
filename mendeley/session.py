@@ -135,7 +135,7 @@ class AutoRefreshMendeleySession(MendeleySession):
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
-            print("I'm in request")
+            print("I'm still in request")
             logger.debug("Requesting " + url)
             # just try the MendeleySession request first
             return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
