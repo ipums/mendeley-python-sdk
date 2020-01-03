@@ -127,6 +127,7 @@ class MendeleySession(OAuth2Session):
 # token expiration. Mendeley access tokens expire after 1 hour.
 class AutoRefreshMendeleySession(MendeleySession):
     def __init__(self, mendeley, token, refresh_token):
+        print("I'm in init")
         super(AutoRefreshMendeleySession, self).__init__(mendeley, token)
         # silly name to avoid namespace collision with oauth refresh_token() method
         self.the_refresh_token = refresh_token
@@ -134,6 +135,7 @@ class AutoRefreshMendeleySession(MendeleySession):
 
     def request(self, method, url, data=None, headers=None, **kwargs):
         try:
+            print("I'm in request")
             logger.debug("Requesting " + url)
             # just try the MendeleySession request first
             return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
