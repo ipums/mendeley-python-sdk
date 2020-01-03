@@ -1,5 +1,7 @@
 import platform
 import logging
+import pdb
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
@@ -155,6 +157,7 @@ class AutoRefreshMendeleySession(MendeleySession):
             # as the one that's probably in the config file.)
             if ((type(e).__name__ is 'MendeleyApiException') and (e.status == 401) and ('Token has expired' in e.message)) or (type(e).__name__ is 'TokenExpiredError'):
                 logger.debug("Handling a token expiration of type " + type(e).__name__)
+                pdb.set_trace()
                 self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
                 logger.debug("Re-requesting " + url)
                 return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
