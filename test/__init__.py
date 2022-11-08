@@ -17,7 +17,7 @@ class DummyStateGenerator(object):
 
 def load_config_from_file(filename):
     with open(filename) as f:
-        config = yaml.load(f)
+        config = yaml.load(f, Loader=yaml.FullLoader)
         
         if 'MENDELEY_CLIENT_ID' in os.environ:
             config['clientId'] = os.environ.get('MENDELEY_CLIENT_ID')
