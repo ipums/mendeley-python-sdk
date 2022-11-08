@@ -10,3 +10,5 @@ test_config.yml
 junit-*.xml
 docs/_build/
 fixtures
+.venv/
+.python-version
