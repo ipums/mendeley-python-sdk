@@ -144,7 +144,7 @@ class TokenRefresher(object):
         self.refresh_token_params = kwargs
     
     def refresh(self, session):
-        new_token = session.refresh_token('https://api.mendeley.com/oauth/token', self.refresh_token, auth=(self.mendeley.client_id, self.mendeley.client_secret), **self.refresh_token_params)
+        new_token = session.refresh_token(f'{self.mendeley.host}/oauth/token', self.refresh_token, auth=(self.mendeley.client_id, self.mendeley.client_secret), **self.refresh_token_params)
         if self.update_token_callback:
             self.update_token_callback(new_token)
 
