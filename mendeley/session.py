@@ -148,3 +148,12 @@ class TokenRefresher(object):
         if self.update_token_callback:
             self.update_token_callback(new_token)
 
+
+# Kept for backwards-compatability
+class AutoRefreshMendeleySession(MendeleySession):
+    def __init__(self, mendeley, token, refresh_token, update_refresh_token_callback):
+        def old_api_callback_wrapper(token):
+            update_refresh_token_callback(token["refresh_token"])
+
+        refresher = TokenRefresher(mendeley, refresh_token, old_api_callback_wrapper, redirect_uri="www.ipums.org")
+        super(AutoRefreshMendeleySession, self).__init__(mendeley, token, refresher=refresher)
