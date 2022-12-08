@@ -101,6 +101,7 @@ class MendeleySession(OAuth2Session):
         headers['user-agent'] = self.__user_agent()
 
         try:
+            logger.debug("Requesting " + url)
             rsp = self.__do_request(data, full_url, headers, kwargs, method)
             # If the first request of a session has an expired token, Mendeley sends back a 401 with the JSON message
             # {"message": "Could not access resource because: Token has expired"}
@@ -112,9 +113,10 @@ class MendeleySession(OAuth2Session):
                 except JSONDecodeError:
                     pass
         except TokenExpiredError as e:
-            logger.debug(f"Handling a token expiration from {e}")
             if self.refresher:
+                logger.debug(f"Handling a token expiration from {e}")
                 self.refresher.refresh(self)
+                logger.debug("Re-requesting " + url)
                 rsp = self.__do_request(data, full_url, headers, kwargs, method)
             else:
                 raise
