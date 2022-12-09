@@ -14,6 +14,7 @@ logger.addHandler(sh)
 from future.moves.urllib.parse import urljoin
 from oauthlib.oauth2 import TokenExpiredError
 from requests_oauthlib import OAuth2Session
+from requests.exceptions import JSONDecodeError
 
 from mendeley.exception import MendeleyApiException
 from mendeley.resources import *
@@ -100,10 +101,22 @@ class MendeleySession(OAuth2Session):
         headers['user-agent'] = self.__user_agent()
 
         try:
+            logger.debug("Requesting " + url)
             rsp = self.__do_request(data, full_url, headers, kwargs, method)
-        except TokenExpiredError:
+            # If the first request of a session has an expired token, Mendeley sends back a 401 with the JSON message
+            # {"message": "Could not access resource because: Token has expired"}
+            # We want to handle that the same as when the oauth session throws a TokenExpiredError
+            if rsp.status_code == 401:
+                try:
+                    if 'Token has expired' in rsp.json()["message"]:
+                        raise TokenExpiredError(status_code=401, request=rsp)
+                except JSONDecodeError:
+                    pass
+        except TokenExpiredError as e:
             if self.refresher:
+                logger.debug(f"Handling a token expiration from {e}")
                 self.refresher.refresh(self)
+                logger.debug("Re-requesting " + url)
                 rsp = self.__do_request(data, full_url, headers, kwargs, method)
             else:
                 raise
@@ -125,50 +138,24 @@ class MendeleySession(OAuth2Session):
                                             platform.system(),
                                             platform.release())  
 
-# extending the MendeleySession class to do auto-token-refresh on
-# token expiration. Mendeley access tokens expire after 1 hour.
+class TokenRefresher(object):
+    def __init__(self, mendeley, refresh_token, update_token_callback, **kwargs):
+        self.mendeley = mendeley
+        self.refresh_token = refresh_token
+        self.update_token_callback = update_token_callback
+        self.refresh_token_params = kwargs
+    
+    def refresh(self, session):
+        new_token = session.refresh_token(f'{self.mendeley.host}/oauth/token', self.refresh_token, auth=(self.mendeley.client_id, self.mendeley.client_secret), **self.refresh_token_params)
+        if self.update_token_callback:
+            self.update_token_callback(new_token)
+
+
+# Kept for backwards-compatability
 class AutoRefreshMendeleySession(MendeleySession):
     def __init__(self, mendeley, token, refresh_token, update_refresh_token_callback):
-        super(AutoRefreshMendeleySession, self).__init__(mendeley, token)
-        # silly name to avoid namespace collision with oauth refresh_token() method
-        self.the_refresh_token = refresh_token
-        self.client_secret = mendeley.client_secret
-        self.update_refresh_token_callback = update_refresh_token_callback
+        def old_api_callback_wrapper(token):
+            update_refresh_token_callback(token["refresh_token"])
 
-    def request(self, method, url, data=None, headers=None, **kwargs):
-        try:
-            logger.debug("Requesting " + url)
-            # just try the MendeleySession request first
-            return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
-        except (MendeleyApiException, TokenExpiredError) as e:
-            logger.debug("Receiving " + type(e).__name__)
-            logger.debug(repr(e))
-            # Check to see if we have an expired access token. This comes in two
-            # forms: either a MendeleyApiException or OAuthlib's TokenExpiredError
-            # Mendeley's API uses MendeleyAPIException for everything so you have
-            # to unpack it.
-            # In event of an expired token it sends back a 401 with the JSON message
-            # {"message": "Could not access resource because: Token has expired"}
-            # and the Python SDK forms a MendeleyAPIException with this message
-            # in e.message and 401 in e.status
-            # OAuthlib will send a TokenExpiredError if you have a long-running
-            # session that goes over an hour. MendeleyApiException occurs when
-            # you try to make a first request with an already expired token (such
-            # as the one that's probably in the config file.)
-            if ((type(e).__name__ is 'MendeleyApiException') and (e.status == 401) and ('Token has expired' in e.message)) or (type(e).__name__ is 'TokenExpiredError'):
-                logger.debug("Handling a token expiration of type " + type(e).__name__)
-                new_token = self.refresh_token('https://api.mendeley.com/oauth/token', self.the_refresh_token, auth=(self.client_id, self.client_secret), redirect_uri="www.ipums.org")
-                logger.debug("Received new token")
-                if((new_token['refresh_token']) and (new_token['refresh_token'] != self.the_refresh_token)):
-                    # Sometimes you'll get back a different refresh token than the one you used.
-                    logger.debug("The refresh token has changed.")
-                    self.update_refresh_token_callback(new_token['refresh_token'])
-                    # we will call some callback here
-                logger.debug("Re-requesting " + url)
-                return super(AutoRefreshMendeleySession, self).request(method, url, data, headers, **kwargs)
-            elif ((type(e).__name__ is 'MendeleyApiException') and (e.status == 400)):
-                logger.debug("Attempt to use refresh token failed.")
-            else:
-                logger.debug("Re-raising " + type(e).__name__)
-                # pass on other mendeley exceptions
-                raise
+        refresher = TokenRefresher(mendeley, refresh_token, old_api_callback_wrapper, redirect_uri="www.ipums.org")
+        super(AutoRefreshMendeleySession, self).__init__(mendeley, token, refresher=refresher)
