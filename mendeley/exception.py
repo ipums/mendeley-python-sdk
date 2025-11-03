@@ -1,3 +1,5 @@
+import requests
+
 class MendeleyException(Exception):
     pass
 
@@ -17,6 +19,6 @@ class MendeleyApiException(MendeleyException):
     def message(self):
         try:
             return self.rsp.json()['message']
-        except ValueError:
+        except (requests.exceptions.JSONDecodeError, KeyError, TypeError, ValueError):
             return self.rsp.text
 
